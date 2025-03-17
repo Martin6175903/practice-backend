@@ -3,6 +3,7 @@ import authRoutes from './auth/auth.routes.js';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import { prisma } from './prisma.js';
+import { errorHandler, notFound } from './middleware/error.middleware.js';
 
 dotenv.config()
 
@@ -14,6 +15,9 @@ async function main() {
 
 	app.use(express.json())
 	app.use('/api/auth', authRoutes)
+
+	app.use(notFound)
+	app.use(errorHandler)
 
 	app.listen(PORT, () => {
 		console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}!`)
