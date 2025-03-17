@@ -15,7 +15,7 @@ model User {
   email    String
   name     String
   password String
-  image    String[]
+  images   String[]
 
   @@map("user")
 }
