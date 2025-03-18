@@ -23,24 +23,28 @@ model User {
 }
 
 model Workout {
-  id          Int          @id @default(autoincrement())
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
-  name        String
-  exercises   Exercise[]   @relation("ExerciseToWorkout")
-  workoutLogs WorkoutLog[]
+  id             Int           @id @default(autoincrement())
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  name           String
+  exercises      Exercise[]    @relation("ExerciseToWorkout")
+  workoutLogs    WorkoutLog[]
+  exerciseTime   ExerciseTime? @relation(fields: [exerciseTimeId], references: [id])
+  exerciseTimeId Int?          @map("exerciseTimeId")
 }
 
 model Exercise {
-  id            Int          @id @default(autoincrement())
-  createdAt     DateTime     @default(now()) @map("created_at")
-  updatedAt     DateTime     @updatedAt @map("updated_at")
-  name          String
-  times         Int
-  iconPath      String       @map("icon_path")
-  workouts      Workout[]    @relation("ExerciseToWorkout")
-  exerciseLog   ExerciseLog? @relation(fields: [exerciseLogId], references: [id])
-  exerciseLogId Int?
+  id             Int           @id @default(autoincrement())
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  name           String
+  times          Int
+  iconPath       String        @map("icon_path")
+  workouts       Workout[]     @relation("ExerciseToWorkout")
+  exerciseLog    ExerciseLog?  @relation(fields: [exerciseLogId], references: [id])
+  exerciseLogId  Int?
+  exerciseTime   ExerciseTime? @relation(fields: [exerciseTimeId], references: [id])
+  exerciseTimeId Int?          @map("exerciseTimeId")
 }
 
 model ExerciseLog {
@@ -70,6 +74,9 @@ model ExerciseTime {
   weight      Int     @default(0)
   repeat      Int     @default(0)
   isCompleted Boolean @default(false) @map("is_completed")
+
+  exercise Exercise[]
+  workouts Workout[]
 
   @@map("Exercise_time")
 }

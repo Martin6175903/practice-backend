@@ -1,5 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import { prisma } from '../../prisma.js';
+import { addPrevValues } from './add-prev-values.util.js';
 
 export const createNewExerciseLog = asyncHandler(async (req, res) => {
 	const exerciseId = +req.params.exerciseId;
@@ -7,20 +8,20 @@ export const createNewExerciseLog = asyncHandler(async (req, res) => {
 		where: {
 			id: exerciseId
 		}
-	})
+	});
 
 	if (!exercise) {
-		res.status(404)
-		throw new Error('Exercise not found!')
+		res.status(404);
+		throw new Error('Exercise not found!');
 	}
 
-	const timesDefault = []
+	const timesDefault = [];
 
 	for (let i = 0; i < exercise.times; i++) {
 		timesDefault.push({
 			weight: 0,
 			repeat: 0
-		})
+		});
 	}
 
 	const exerciseLog = await prisma.exerciseLog.create({
@@ -45,25 +46,29 @@ export const createNewExerciseLog = asyncHandler(async (req, res) => {
 			times: true,
 			_count: true
 		}
-	})
+	});
 
-	res.json(exerciseLog)
-})
+	res.json(exerciseLog);
+});
 
 export const getExerciseLog = asyncHandler(async (req, res) => {
-	const id = +req.params.id
 	const exerciseLog = await prisma.exerciseLog.findUnique({
 		where: {
-			id
+			id: +req.params.id
 		},
 		include: {
-			exercise: true
+			exercise: true,
+			times: {
+				orderBy: {
+					createdAt: 'asc'
+				}
+			}
 		}
-	})
+	});
 
-	if(!exerciseLog) {
-		res.status(404)
-		throw new Error('ExerciseLog not found')
+	if (!exerciseLog) {
+		res.status(404);
+		throw new Error('ExerciseLog not found');
 	}
 
 	const prevExerciseLog = await prisma.exerciseLog.findFirst({
@@ -74,14 +79,57 @@ export const getExerciseLog = asyncHandler(async (req, res) => {
 		},
 		orderBy: {
 			createdAt: 'desc'
+		},
+		include: {
+			times: true
 		}
-	})
+	});
+	console.log(prevExerciseLog);
 
-	res.json(exerciseLog)
+	res.json({ ...exerciseLog, times: addPrevValues(exerciseLog, prevExerciseLog) });
+});
+
+export const updateExerciseLog = asyncHandler(async (req, res) => {
+	const { weight, repeat, isCompleted } = req.body
+
+	try {
+		const exerciseLogTime = await prisma.exerciseTime.update({
+			where: {
+				id: +req.params.id
+			},
+			data: {
+				weight, repeat, isCompleted
+			}
+		})
+
+		res.json(exerciseLogTime)
+	} catch (err) {
+		res.status(404)
+		throw new Error('ExerciseLog not found')
+	}
+
 })
 
-export const getExerciseLogs = asyncHandler(async (req, res) => {
-	const exerciseLogs = await prisma.exerciseLog.findMany()
+export const completeExerciseLog = asyncHandler(async (req, res) => {
+	const { isCompleted } = req.body
 
-	res.json(exerciseLogs)
+	try {
+		const exerciseLog = await prisma.exerciseTime.update({
+			where: {
+				id: +req.params.id
+			},
+			data: {
+				isCompleted
+			},
+			include: {
+				exercises: true,
+				workouts: true
+			}
+		})
+
+		res.json(exerciseLog)
+	} catch (err) {
+		res.status(404)
+		throw new Error('ExerciseLog not found')
+	}
 })
