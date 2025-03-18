@@ -27,6 +27,8 @@ model Workout {
 
   name      String
   exercises Exercise[]
+
+  @@map("workout")
 }
 
 model Exercise {
@@ -39,4 +41,6 @@ model Exercise {
   iconPath String @map("icon_path")
 
   workouts Workout[]
+
+  @@map("exercise")
 }
