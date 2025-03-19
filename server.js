@@ -8,6 +8,7 @@ import userRoutes from './user/user.routes.js';
 import exerciseRoutes from './exercise/exercise.routes.js';
 import path from 'path';
 import workoutRoutes from './workout/workout.routes.js';
+import cors from 'cors';
 
 dotenv.config()
 
@@ -19,6 +20,7 @@ async function main() {
 
 	const __dirname = path.resolve()
 
+	app.use(cors())
 	app.use(express.json())
 
 	app.use('/uploads', express.static(path.join(__dirname, '/uploads')))
