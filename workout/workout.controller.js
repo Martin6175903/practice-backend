@@ -1,5 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import { prisma } from '../prisma.js';
+import { calculateMinute } from './calculate-minute.js';
 
 export const createNewWorkout = asyncHandler(async (req, res) => {
 	const {name, exerciseIds} = req.body
@@ -25,7 +26,7 @@ export const getWorkout = asyncHandler(async (req, res) => {
 			}
 		})
 
-		const minutes = Math.ceil(workout.exercises.length * 3.7)
+		const minutes = calculateMinute(workout.exercises.length)
 
 		res.json({ ...workout, minutes })
 	} catch (err) {

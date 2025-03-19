@@ -84,7 +84,6 @@ export const getExerciseLog = asyncHandler(async (req, res) => {
 			times: true
 		}
 	});
-	console.log(prevExerciseLog);
 
 	res.json({ ...exerciseLog, times: addPrevValues(exerciseLog, prevExerciseLog) });
 });
